@@ -3,7 +3,7 @@
   "version": "1.2.1",
   "description": "Frontend SPA for Oni. Best deployed via oni-express",
   "main": "index.js",
-  "repository": "https://github.com/UTS-eResearch/oni-portal",
+  "repository": "https://github.com/Language-Research-Technology/oni-portal",
   "scripts": {
     "build": "webpack",
     "start:dev": "webpack-dev-server"
