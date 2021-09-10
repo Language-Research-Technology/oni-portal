@@ -7,9 +7,6 @@ const Menu = function (data) {
   </button>
   <div class="collapse navbar-collapse" id="navbarNav">
     <ul class="navbar-nav">
-      <li class="nav-item active">
-        <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
-      </li>
       ${pageLinks(data)}   
     </ul>
   </div>
@@ -18,11 +15,17 @@ const Menu = function (data) {
 };
 
 function pageLinks(data) {
-  var html = '';
-  if( data.header['menu'] ) {
+  let home = {ref: '#', title: 'Home'}
+  if (data.header['home']) {
+    home = data.header['home'];
+  }
+  let html = `<li class="nav-item active">
+      <a class="nav-link" href="${home.ref}">${home.title}</a>
+    </li>`;
+  if (data.header['menu']) {
     data.header['menu'].forEach((m) => {
       const page = data.pages[m];
-      if( page ) {
+      if (page) {
         html += `<li class="nav-item active">
       <a class="nav-link" href="/#page/${m}">${page.title}</a>
       </li>`

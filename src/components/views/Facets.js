@@ -20,25 +20,25 @@ const SearchPath = require('../SearchPath');
 
 function renderFacet(data, facetName, showFocusLink) {
   const facet = data.facets[facetName];
-  if ( !(facetName in data.facetData) ) {
+  if (!(facetName in data.facetData)) {
     console.log(`can't find facet data for ${facetName}`);
     return `<p>No facet data for ${facetName}`;
   }
 
-  const values = data.facetData[facetName].filter((v)=>v['count'] > 0);
+  const values = data.facetData[facetName].filter((v) => v['count'] > 0);
 
-  let focusLink = showFocusLink ? SearchPath.toURI({}, { showFacet: facetName }) : null;
+  let focusLink = showFocusLink ? SearchPath.toURI({}, {showFacet: facetName}) : null;
   let html = `<li class="list-group-item">
   <div>
     <div class="facetLabel">${facet.label}</div>
         <ul class="list-group">`;
-  if(isIterable(values)) {
-    for(let f of values ){
+  if (isIterable(values)) {
+    for (let f of values) {
       html += `<li class="facet">${Facets.linkProcessed(data, facet, f)} (${f['count']})</span></li>\n`;
     }
   }
 
-  if( focusLink ) {
+  if (focusLink) {
     html += `<li class="facet"><a href="${focusLink}">All...</a></li>`;
   }
 
@@ -48,11 +48,36 @@ function renderFacet(data, facetName, showFocusLink) {
   return html;
 }
 
+function renderFacetExpand(data, facetName, showFocusLink) {
+  const facet = data.facets[facetName];
+  if (!(facetName in data.facetData)) {
+    console.log(`can't find facet data for ${facetName}`);
+    return `<p>No facet data for ${facetName}`;
+  }
+
+  const values = data.facetData[facetName].filter((v) => v['count'] > 0);
+
+  let focusLink = showFocusLink ? SearchPath.toURI({}, {showFacet: facetName}) : null;
+  let html = '';
+  if (isIterable(values)) {
+    for (let f of values) {
+      html += `<ul class="list-group col-sm-4">`;
+      html += `<li class="list-group-item"><div>`;
+      html += `<div class="facetLabel"></div>`;
+      html += `<ul class="list-group><li class="facet">${Facets.linkProcessed(data, facet, f)} (${f['count']})</span></li>`;
+      if (focusLink) {
+        html += `<li class="facet"><a href="${focusLink}">All...</a></li>`;
+      }
+      html += `</ul></div></ul>`
+    }
+  }
+  return html;
+}
 
 function processFacet(cf, raw, count) {
-  if( cf['JSON'] ) {
+  if (cf['JSON']) {
     const value = tryJSON(raw);
-    if( value ) {
+    if (value) {
       return {
         display: value['display'],
         search: value['search'],
@@ -82,12 +107,11 @@ function processFacet(cf, raw, count) {
 function tryJSON(value) {
   try {
     return JSON.parse(value);
-  } catch(e) {
+  } catch (e) {
     //console.log("Facet parse error: " + e);
-    return  null;
+    return null;
   }
 }
-
 
 
 const Facets = {
@@ -101,13 +125,13 @@ const Facets = {
   //
   // TODO - stash facet maps at this stage
 
-  processAll: function(data, solrFacets) {
+  processAll: function (data, solrFacets) {
     const facets = {};
     const filterMaps = {};
-    for( let facetName in solrFacets ) {
+    for (let facetName in solrFacets) {
       facets[facetName] = [];
       const filterMap = {};
-      for( let i = 0; i < solrFacets[facetName].length; i += 2 ) {
+      for (let i = 0; i < solrFacets[facetName].length; i += 2) {
         const raw = solrFacets[facetName][i];
         const count = solrFacets[facetName][i + 1];
         const facetVal = processFacet(data.facets[facetName], raw, count);
@@ -116,7 +140,7 @@ const Facets = {
       }
       filterMaps[data.facets[facetName].field] = filterMap;
     }
-    return { facets: facets, filterMaps: filterMaps }
+    return {facets: facets, filterMaps: filterMaps}
   },
 
   // process: process a single value. This is used for the facet links on search results
@@ -131,23 +155,40 @@ const Facets = {
   sidebar: function (data) {
     let html = '';
 
-    if(isIterable(data.results.searchFacets) ){
+    if (isIterable(data.results.searchFacets)) {
       html = `<ul class="list-group col-sm-3">`;
-      for(let facetName of data.results.searchFacets ) {
-        if( ! data.main.showFacet || facetName !== data.main.showFacet ) {
+      for (let facetName of data.results.searchFacets) {
+        if (!data.main.showFacet || facetName !== data.main.showFacet) {
           html += renderFacet(data, facetName, true);
         }
       }
       html += `</ul>`;
     }
-  return html;
+    return html;
+  },
+
+  expand: function (data) {
+    let html = '';
+
+    if (isIterable(data.results.searchFacets)) {
+
+      for (let facetName of data.results.searchFacets) {
+        if (!data.main.showFacet || facetName !== data.main.showFacet) {
+          html += renderFacetExpand(data, facetName, true);
+        }
+      }
+
+    }
+
+
+    return html;
   },
 
   // focus: for when we're viewing all of the results from a single facet in the
   // main column
 
-  focus: function(data, showFacet) {
-    if( showFacet in data.facets ) {
+  focus: function (data, showFacet) {
+    if (showFacet in data.facets) {
       let html = `<ul class="list-group col-9">`;
       html += renderFacet(data, showFacet, false);
       html += `</ul>`;
@@ -160,18 +201,18 @@ const Facets = {
   // link: generates a facet link from the results returned from the process methods
   // above
 
-  linkProcessed: function(data, facet, f) {
-    const url = SearchPath.toURI(data.main.currentSearch, { [facet['field']]: f['search'] } );
+  linkProcessed: function (data, facet, f) {
+    const url = SearchPath.toURI(data.main.currentSearch, {[facet['field']]: f['search']});
 
-    if( facet['display_re'] ) {
+    if (facet['display_re']) {
       const m = f['display'].match(facet['display_re']);
-      if( m ) {
+      if (m) {
         return `<a href="${url}" title="${m[2]}">${m[1]}</a>`;
       } else {
         console.log("no match!");
       }
     }
-    if(!f['display']) {
+    if (!f['display']) {
       return `<span>Not Found</span>`;
     } else {
       return `<a href="${url}">${f['display']}</a>`;
@@ -181,7 +222,7 @@ const Facets = {
 
   // link: nicer process/link
 
-  link: function(data, facetName, raw) {
+  link: function (data, facetName, raw) {
     const processed = processFacet(data.facets[facetName], raw);
     return Facets.linkProcessed(data, data.facets[facetName], processed);
   },
@@ -190,9 +231,9 @@ const Facets = {
   // which was stored in data.filterMaps. This is used to make sure that facets which are
   // searched by ID (like FORs) get displayed in the filter tags in a human-readable way
 
-  filterTag: function(data, field) {
-    if( field in data.main.currentSearch ) {
-      if( field in data.filterMaps ) {
+  filterTag: function (data, field) {
+    if (field in data.main.currentSearch) {
+      if (field in data.filterMaps) {
         return data.filterMaps[field][data.main.currentSearch[field]];
       } else {
         return data.main.currentSearch[field];

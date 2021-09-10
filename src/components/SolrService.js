@@ -16,14 +16,13 @@ const SolrService = {
       if( search && Object.keys(search).length > 0 ) {
         const searches = Object.keys(search).map((k) => {
           if( k === config.search.mainSearch ) {
-            return k + ':' + escapeSolrQuery(search[k]);
+            return k + ':' + encodeURIComponent(escapeSolrQuery(search[k]));
           } else {
-            return k + ':' + '"' + escapeSolrQuery(search[k]) + '"';
+            return k + ':' + '\"' + encodeURIComponent(escapeSolrQuery(search[k]) )+ '\"';
           }
         });
         searchParams = searches.join(' && ')
       }
-      searchParams = encodeURIComponent(searchParams);
       var query = `select?q=${searchParams}&start=${start}&page=${page}`;
 
       if( config.facets ) {

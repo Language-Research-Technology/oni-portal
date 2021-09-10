@@ -8,6 +8,8 @@ const SubDoc = require('./SubDoc');
 const SubDocLink = require('./SubDocLink');
 const SubDocJson = require('./SubDocJson');
 const SubDocJsonArray = require('./SubDocJsonArray');
+const SubDocArrayJson = require('./SubDocArrayJson');
+const SubDocArrayIndexResolve = require('./SubDocArrayIndexResolve');
 const SubDocSubgraph = require('./SubDocSubgraph');
 const SubDocImage = require('./SubDocImage');
 const SubDocImageArray = require('./SubDocImageArray');
@@ -119,6 +121,46 @@ const ViewTable = async function (data, doc) {
           }
         }
         break;
+      case 'SubDocArrayJson':
+        if (doc[sdcf.field]) {
+          const valueHtml = renderValue(data, sdcf, doc);
+          let repoPathId = _.first(doc.path) || '';
+          if (doc.path) {
+            repoPathId = repoPathId.replace(/\//g, '');
+          }
+          if (valueHtml) {
+            const row = $('<div class="">');
+            const subDoc = SubDocArrayJson({
+              config: sdcf,
+              value: valueHtml,
+              element: row,
+              path: repoPathId
+            });
+            nonEmptyDiv = true;
+            list.append(subDoc);
+          }
+        }
+        break;
+      case 'SubDocArrayIndexResolve':
+        if (doc[sdcf.field]) {
+          const valueHtml = renderValue(data, sdcf, doc);
+          let repoPathId = _.first(doc.path) || '';
+          if (doc.path) {
+            repoPathId = repoPathId.replace(/\//g, '');
+          }
+          if (valueHtml) {
+            const row = $('<div class="">');
+            const subDoc = SubDocArrayIndexResolve({
+              config: sdcf,
+              value: valueHtml,
+              element: row,
+              path: repoPathId
+            });
+            nonEmptyDiv = true;
+            list.append(subDoc);
+          }
+        }
+        break;
       case 'SubDocSubgraph':
         if (doc[sdcf.field]) {
           const valueHtml = renderValue(data, sdcf, doc);
@@ -148,9 +190,13 @@ const ViewTable = async function (data, doc) {
       case 'SubDocImageArray':
         if (doc[sdcf.field]) {
           const valueHtml = renderValue(data, sdcf, doc);
+          let repoPathId = _.first(doc.path) || '';
+          if (doc.path) {
+            repoPathId = repoPathId.replace(/\//g, '');
+          }
           if (valueHtml) {
             const row = $('<div class="row">');
-            const subDoc = SubDocImageArray({config: sdcf, value: valueHtml, element: row});
+            const subDoc = SubDocImageArray({config: sdcf, value: valueHtml, element: row, path: repoPathId});
             nonEmptyDiv = true;
             list.append(subDoc);
           }

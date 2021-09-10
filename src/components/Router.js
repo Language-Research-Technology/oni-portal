@@ -49,7 +49,27 @@ const Router = async function (state) {
     const page = state.pages[query] || state.errors.not_found;
     app.innerHTML = Layout(state, Facets.sidebar(state), Page(page));
 
-  } else {
+  } else if(verb === '#home/') {
+    if(state.config['expandFacets']) {
+      const { start, page, search } = SearchPath.fromURI(state.main.start, '', query);
+      const showFacet = search['showFacet'];
+      delete search['showFacet'];
+      const res = await solrService.select(state, {
+        start: start,
+        page: page,
+        search: search,
+        showFacet: showFacet
+      });
+      state.main.currentSearch = search;
+      state.main.showFacet = true;
+      state.facetResult = res.facets;
+      const facets = Facets.processAll(state, state.facetResult['facet_fields']);
+      state.facetData = facets['facets'];
+      state.filterMaps = facets['filterMaps'];
+      app.innerHTML = Layout(state, '', Facets.expand(state));
+    }
+  }
+  else {
 
     // Do a new search and render either the search results or a focussed
     // facet in the main column
