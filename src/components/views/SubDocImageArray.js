@@ -17,7 +17,7 @@ const SubDocImageArray = function (data) {
       if (d.match(/\.(?:wav|mp3)$/i)) {
         mediaType = 'mp3';
       }
-      if (d.match(/\.(?:txt|doc|pdf)$/i)) {
+      if (d.match(/\.(?:txt|doc|pdf|xml)$/i)) {
         mediaType = 'txt';
       }
       let imagePath = '';
