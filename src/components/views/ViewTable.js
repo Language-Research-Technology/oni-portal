@@ -13,6 +13,9 @@ const SubDocArrayIndexResolve = require('./SubDocArrayIndexResolve');
 const SubDocSubgraph = require('./SubDocSubgraph');
 const SubDocImage = require('./SubDocImage');
 const SubDocImageArray = require('./SubDocImageArray');
+const SubDocFileViewer = require('./SubDocFileViewer');
+const SubDocSubJson = require('./SubDocSubJson');
+const SubDocSolrSearch = require('./SubDocSolrSearch');
 
 const ViewTable = async function (data, doc) {
 
@@ -197,6 +200,51 @@ const ViewTable = async function (data, doc) {
           if (valueHtml) {
             const row = $('<div class="row">');
             const subDoc = SubDocImageArray({config: sdcf, value: valueHtml, element: row, path: repoPathId});
+            nonEmptyDiv = true;
+            list.append(subDoc);
+          }
+        }
+        break;
+      case 'SubDocFileViewer':
+        if (doc[sdcf.field]) {
+          const valueHtml = renderValue(data, sdcf, doc);
+          let repoPathId = _.first(doc.path) || '';
+          if (doc.path) {
+            repoPathId = repoPathId.replace(/\//g, '');
+          }
+          if (valueHtml) {
+            const row = $('<div class="row">');
+            const subDoc = SubDocFileViewer({config: sdcf, value: valueHtml, element: row, path: repoPathId});
+            nonEmptyDiv = true;
+            list.append(subDoc);
+          }
+        }
+        break;
+      case 'SubDocSubJson':
+        if (doc[sdcf.field]) {
+          const valueHtml = renderValue(data, sdcf, doc);
+          let repoPathId = _.first(doc.path) || '';
+          if (doc.path) {
+            repoPathId = repoPathId.replace(/\//g, '');
+          }
+          if (valueHtml) {
+            const row = $('<div class="row">');
+            const subDoc = SubDocSubJson({config: sdcf, value: valueHtml, element: row, path: repoPathId});
+            nonEmptyDiv = true;
+            list.append(subDoc);
+          }
+        }
+        break;
+      case 'SubDocSolrSearch':
+        if (doc[sdcf.field]) {
+          const valueHtml = renderValue(data, sdcf, doc);
+          let repoPathId = _.first(doc.path) || '';
+          if (doc.path) {
+            repoPathId = repoPathId.replace(/\//g, '');
+          }
+          if (valueHtml) {
+            const row = $('<div class="row">');
+            const subDoc = await SubDocSolrSearch(data, {config: sdcf, value: valueHtml, element: row, path: repoPathId});
             nonEmptyDiv = true;
             list.append(subDoc);
           }

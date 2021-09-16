@@ -24,23 +24,35 @@ const Router = async function (state) {
 
   if (verb === '#view/') {
 
-    // Load and view a single item
-
-    const res = await solrService.select(state, {
-      start: 0,
-      page: 1,
-      search: { id: decodeURIComponent(query) },
-      facets: false
-    });
-    if (res.status === 200 && res.data["numFound"] === 1 ) {
-      state.main.doc = res.data["docs"][0];
-      const main_html = await ViewDoc.main(state);
-      app.innerHTML = Layout(state, ViewDoc.summary(state), main_html);
-    } else {
-      app.innerHTML = Layout(state, '', ViewError(state));
+    const verb2 = query.match(/(#.*?\/)(.*)/);
+    let viewer = undefined;
+    if (verb2 && verb2[1]) {
+      console.log(verb2)
+      viewer = verb2[1];
+      query = verb2[2];
     }
+    // Load and view a single item
+    if (viewer) {
+      const main_html = ViewDoc.plugin(state, viewer, query);
+      app.innerHTML = Layout(state, '', main_html);
+    } else {
+      const res = await solrService.select(state, {
+        start: 0,
+        page: 1,
+        search: {id: decodeURIComponent(query)},
+        facets: false
+      });
+      if (res.status === 200 && res.data["numFound"] === 1) {
+        state.main.doc = res.data["docs"][0];
 
-  } else if( verb === '#page/' ) {
+        const main_html = await ViewDoc.main(state);
+        app.innerHTML = Layout(state, ViewDoc.summary(state), main_html);
+
+      } else {
+        app.innerHTML = Layout(state, '', ViewError(state));
+      }
+    }
+  } else if (verb === '#page/') {
 
     // Render one of the help pages in the main column and facets
     // from the most recent search in the sidebar
@@ -49,9 +61,9 @@ const Router = async function (state) {
     const page = state.pages[query] || state.errors.not_found;
     app.innerHTML = Layout(state, Facets.sidebar(state), Page(page));
 
-  } else if(verb === '#home/') {
-    if(state.config['expandFacets']) {
-      const { start, page, search } = SearchPath.fromURI(state.main.start, '', query);
+  } else if (verb === '#home/') {
+    if (state.config['expandFacets']) {
+      const {start, page, search} = SearchPath.fromURI(state.main.start, '', query);
       const showFacet = search['showFacet'];
       delete search['showFacet'];
       const res = await solrService.select(state, {
@@ -68,13 +80,12 @@ const Router = async function (state) {
       state.filterMaps = facets['filterMaps'];
       app.innerHTML = Layout(state, '', Facets.expand(state));
     }
-  }
-  else {
+  } else {
 
     // Do a new search and render either the search results or a focussed
     // facet in the main column
 
-    const { start, page, search } = SearchPath.fromURI(state.main.start, '', query);
+    const {start, page, search} = SearchPath.fromURI(state.main.start, '', query);
 
     const showFacet = search['showFacet'];
     delete search['showFacet'];
@@ -98,7 +109,7 @@ const Router = async function (state) {
       state.filterMaps = facets['filterMaps'];
       state.main.currentStart = parseInt(start);
       state.main.currentPage = parseInt(page);
-      
+
       const input = document.getElementById('text-to-search');
       if (input) {
         input.value = search['main_search'] || '';
@@ -108,7 +119,7 @@ const Router = async function (state) {
       // results. We do this here so that at least one search has been run
       // and there's something to put in the facets sidebar.
 
-      if( state['splash'] ) {
+      if (state['splash']) {
         const page = state.pages[state['splash']];
         state['splash'] = null;
         app.innerHTML = Layout(state, Facets.sidebar(state), Page(page));
@@ -121,7 +132,6 @@ const Router = async function (state) {
     }
   }
 };
-
 
 
 module.exports = Router;
