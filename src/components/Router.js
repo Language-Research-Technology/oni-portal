@@ -72,13 +72,21 @@ const Router = async function (state) {
         search: search,
         showFacet: showFacet
       });
-      state.main.currentSearch = search;
-      state.main.showFacet = true;
-      state.facetResult = res.facets;
-      const facets = Facets.processAll(state, state.facetResult['facet_fields']);
-      state.facetData = facets['facets'];
-      state.filterMaps = facets['filterMaps'];
-      app.innerHTML = Layout(state, '', Facets.expand(state));
+      if (res.status === 200) {
+        state.main.currentSearch = search;
+        state.main.showFacet = true;
+        state.facetResult = res.facets;
+        const facets = Facets.processAll(state, state.facetResult['facet_fields']);
+        state.facetData = facets['facets'];
+        state.filterMaps = facets['filterMaps'];
+        app.innerHTML = Layout(state, '', Facets.expand(state));
+      } else {
+        state.error = {
+          status: res.status,
+          message: 'Cannot search for results, right now'
+        };
+        app.innerHTML = Layout(state, '', ViewError(state));
+      }
     }
   } else {
 
@@ -128,6 +136,10 @@ const Router = async function (state) {
         app.innerHTML = Layout(state, Facets.sidebar(state), results);
       }
     } else {
+      state.error = {
+        status: res.status,
+        message: 'Cannot search for results, right now'
+      };
       app.innerHTML = Layout(state, '', ViewError(state));
     }
   }

@@ -1,13 +1,16 @@
 const $ = require("jquery");
 
-const ViewErrorElement = function () {
-
+const ViewErrorElement = function (error) {
+  let message = 'Display Error';
+  if (error['status']) {
+    message = error['status'];
+  }
   const dummy = $('<div>');
 
   const heading = $('<h3>').html('Error');
-  const desc = $('<p>').html('Canot display element');
-
-  dummy.append(heading).append(desc);
+  const messageHtml = $('<p>').html(`${error['message']}`);
+  const messageDetail = $('<p>').html(message);
+  dummy.append(heading).append(messageDetail).append(messageHtml);
   return dummy.html();
 };
 

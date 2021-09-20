@@ -1,13 +1,13 @@
 const $ = require("jquery");
 const ViewErrorElement = require('./ViewErrorElement');
 
-const ViewDoc = function () {
-
+const ViewError = function (state) {
   const dummy = $('<div>');
+  const col = $('<div class="col">');
   const summary = $('<div class="jumbotron">');
-  summary.append(ViewErrorElement());
-  dummy.append(summary);
+  col.append(summary.append(ViewErrorElement(state.error)));
+  dummy.append(col);
   return dummy.html();
 };
 
-module.exports = ViewDoc;
+module.exports = ViewError;
