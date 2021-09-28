@@ -3,7 +3,7 @@ const Header = function (data) {
   if (data.config['user']) {
     const user = data.config['user'];
     const displayName = user['displayName'];
-    html = `<div class="align-middle">User: <a href="#">${displayName}</a><br/><a href="/auth/logout">Logout</a></div>`;
+    html = `<div class="align-middle">User: <a href="#user/">${displayName}</a><br/><a href="/auth/logout">Logout</a></div>`;
   } else {
     html = `<h6 class="align-middle"><a href="/auth/github">Login</a></h6>`;
   }

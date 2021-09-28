@@ -61,6 +61,10 @@ module.exports = {
       "/ocfl": {
         "target": "http://localhost:8080/",
         "secure": false
+      },
+      "/auth":{
+        "target": "http://localhost:8080/",
+        "secure": false
       }
     },
     historyApiFallback: {

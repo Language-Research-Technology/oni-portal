@@ -4,6 +4,7 @@ const SearchResults = require('./views/SearchResults');
 const Facets = require('./views/Facets');
 const Footer = require('./views/Footer');
 const ViewDoc = require('./views/ViewDoc');
+const ViewUser = require('./views/user/ViewUser');
 const ViewError = require('./views/ViewError');
 
 const solrService = require('./SolrService');
@@ -20,9 +21,10 @@ const Router = async function (state) {
     verb = match[1];
     query = match[2];
   }
-
-
-  if (verb === '#view/') {
+  if (verb === '#user/') {
+    const main_html = ViewUser.main(state);
+    app.innerHTML = Layout(state, '', main_html);
+  } else if (verb === '#view/') {
 
     const verb2 = query.match(/(#.*?\/)(.*)/);
     let viewer = undefined;
