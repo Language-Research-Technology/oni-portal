@@ -18,11 +18,13 @@ function subjsontohtml(config, data) {
   return html;
 }
 
-function searchToHtml({results, mainSearch, searchInput}) {
-  let html = $('<div class="">');
-  const header = $('<p></p>').html(`<strong>Contains</strong>`);
-  html.append(header);
-  if (results.data.docs) {
+function searchToHtml({results, mainSearch, searchInput}, config) {
+  //Only show if you have results
+  if (results.data.docs && results.data.docs.length > 0) {
+    let html = $('<div class="">');
+    const l = config['label'] || 'Contains';
+    const header = $('<p></p>').html(`<strong>${l}</strong>`);
+    html.append(header);
     _.each(results.data.docs, function (e) {
       const container = $('<div class="row">');
       const type = _.first(e['Type']) || '';
@@ -33,16 +35,21 @@ function searchToHtml({results, mainSearch, searchInput}) {
       container.append(label).append(value);
       html.append(container)
     });
+    const encodedSearchInput = encodeURIComponent(searchInput);
+    const searchId = `${mainSearch}=${encodedSearchInput}`;
+    const seeMore = $('<p></p>').html(`<a href="/#search/0/1/${searchId}">see more</a>`);
+    html.append(seeMore);
+    return html;
   }
-  const encodedSearchInput = encodeURIComponent(searchInput);
-  const searchId = `${mainSearch}=${encodedSearchInput}`;
-  const seeMore = $('<p></p>').html(`<a href="/#search/0/1/${searchId}">see more</a>`);
-  html.append(seeMore);
-  return html;
 }
 
 async function solrSearch(state, mainSearch, searchInput) {
-  const inputDecode = _.first(searchInput);
+  let inputDecode = '';
+  if (Array.isArray(searchInput)) {
+    inputDecode = _.join(searchInput, ',');
+  } else {
+    inputDecode = searchInput;
+  }
   let input = {
     [mainSearch]: inputDecode
   }
@@ -60,7 +67,7 @@ async function solrSearch(state, mainSearch, searchInput) {
 const SubDocSolrSearch = async function (state, data) {
   try {
     const results = await solrSearch(state, data.config.searchField || 'main_search', data.value);
-    const html = searchToHtml(results);
+    const html = searchToHtml(results, data.config);
     return html;
   } catch (e) {
     console.log(`Error searching for ${data.value}`);
