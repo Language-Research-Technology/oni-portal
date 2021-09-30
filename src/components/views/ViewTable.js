@@ -195,7 +195,7 @@ const ViewTable = async function (data, doc) {
           const valueHtml = renderValue(data, sdcf, doc);
           let repoPathId = _.first(doc.path) || '';
           if (doc.path) {
-            repoPathId = repoPathId.replace(/\//g, '');
+            repoPathId = repoPathId;
           }
           if (valueHtml) {
             const row = $('<div class="row">');

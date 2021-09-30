@@ -1,4 +1,5 @@
 const $ = require('jquery');
+const ocfltools = require('../OCFLTools');
 
 const SubDocImageArray = function (data) {
   if (Array.isArray(data.value)) {
@@ -13,16 +14,18 @@ const SubDocImageArray = function (data) {
           throw ('Error: cannot parse json SubDocImageArray');
         }
       }
+      //TODO: use a proper file descriptor or read it from the metadata!
       let mediaType = undefined;
       if (d.match(/\.(?:wav|mp3)$/i)) {
         mediaType = 'mp3';
       }
-      if (d.match(/\.(?:txt|doc|pdf|xml)$/i)) {
+      if (d.match(/\.(?:txt|doc|pdf|xml|csv)$/i)) {
         mediaType = 'txt';
       }
       let imagePath = '';
       if (data.config.resolveVia) {
-        imagePath = `${data.config.resolveVia}/${data.path}/${d}`;
+        const deOcflPath = ocfltools.cleanPath(data.path);
+        imagePath = `${data.config.resolveVia}/${deOcflPath}/${d}`;
       } else if (data.config.prefix) {
         imagePath = data.config.prefix + d;
       }
