@@ -11,9 +11,18 @@ const SubDocArrayJson = function (data) {
     title.append(header);
     subDiv.append(title);
     div.append(subDiv);
-    if (Array.isArray(data.value)) {
-      data.value.forEach((dataEach, index) => {
-        dataEach = JSON.parse(dataEach.replace(/\\/g, ""));
+    // Ugly hacks below dont look...
+    let dataValue;
+    try {
+      dataValue = JSON.parse(data.value);
+    } catch (e) {
+      dataValue = data.value;
+    }
+    if (Array.isArray(dataValue)) {
+      dataValue.forEach((dataEach, index) => {
+        if(typeof dataEach !== 'object') {
+          dataEach = JSON.parse(dataEach.replace(/\\/g, ""));
+        }
         const list = $('<div class="row row-desc-json">');
         const keyConfig = data.config.keys;
         Object.keys(dataEach).forEach(function (key) {
@@ -23,7 +32,11 @@ const SubDocArrayJson = function (data) {
             if(foundKey.displayLink){
               const label = $('<div class="col-sm-2">').html(`<strong>${index+1}</strong>`);
               list.append(label);
-              const a = `<a href="/${data.config.resolveVia}/${data.path}/${dataEach[key]}" rel="noreferer noopener" target="_blank">${dataEach[key]}</a>`;
+              let textLink = dataEach[key];
+              if(data.config.labelKey) {
+                textLink = dataEach[data.config.labelKey] || dataEach[key];
+              }
+              const a = `<a href="/${data.config.resolveVia}/${data.path}/${dataEach[key]}" rel="noreferer noopener" target="_blank">${textLink}</a>`;
               value = $('<div class="col-sm-10">').html(a);
             } else if(foundKey.displayNumber) {
               const label = $('<div class="col-sm-2">').html(`<strong>${index+1}</strong>`);
